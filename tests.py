@@ -9,8 +9,9 @@ class WebTestCase(unittest.TestCase):
     """tests for the echo server and client"""
 
     def setUp(self):
-        self.port = random.randint(8001, 16000)
+        self.port = 10000
 
+        # self.port = random.randint(8001, 16000)
         self.server_process = subprocess.Popen(
             [
                 "python",

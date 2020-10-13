@@ -3,6 +3,7 @@ import sys
 import traceback
 import os
 import mimetypes
+from PIL import Image
 
 class HttpServer():
 
@@ -54,12 +55,11 @@ class HttpServer():
 
         Then you would return "/images/sample_1.png"
         """
-
-        return "TODO: COMPLETE THIS"  # TODO
-
-
+        
+        return request.split()[1]
+        
     @staticmethod
-    def get_mimetype(path):
+    def get_mimetype(path_):
         """
         This method should return a suitable mimetype for the given `path`.
 
@@ -85,13 +85,14 @@ class HttpServer():
             # for files that don't exist.
         """
 
-        if path.endswith('/'):
+        if path_.endswith('/'):
             return b"text/plain"
+            # return b"text/html"
         else:
-            return b"TODO: FINISH THE REST OF THESE CASES"  # TODO
-
+            return '{}'.format(mimetypes.guess_type(path_)[0]).encode("utf8") 
+            
     @staticmethod
-    def get_content(path):
+    def get_content(path_):
         """
         This method should return the content of the file/directory
         indicated by `path`. For example, if path is `/a_web_page.html`
@@ -124,13 +125,41 @@ class HttpServer():
             # so this should raise a FileNotFoundError.
         """
 
-        return b"Not implemented!"  # TODO: Complete this function.
+        # try:
+        #     if os.path.isdir("webroot/" + path_):
+        #         return ["{}".format(item).encode("utf8") for item in os.listdir("webroot/" + path_)]
+        #     if os.path.isfile("webroot/" + path_):
+        #         if path_.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif')):
+        #             Image.open("webroot/" + path_)
+        #         elif path_.lower().endswith(('.txt', '.py', '.html')):
+        #             with open("webroot/" + path_, "rb") as f:
+        #                 return f.read()           
+        # except FileNotFoundError:
+        #     raise FileNotFoundError(f"{path_} doesn't exist")
+
+        filepath = "webroot/" + path_
+        if os.path.exists(filepath): 
+            if os.path.isdir(filepath):
+                # dirlst = ["{}\n".format(item) for item in os.listdir(filepath)]
+                # `<a href="/images/sample_1.png">arbitrary link text</a>`
+                dirlst = ["<a href={}>{}</a>\n".format(str(item), str(item)) for item in os.listdir(filepath)]
+                return "".join(dirlst).encode("utf8")
+
+            if os.path.isfile(filepath):
+                if path_.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif')):
+                    with Image.open(filepath) as img:
+                        return img.show()
+                if path_.lower().endswith(('.txt', '.py', '.html')):
+                    with open(filepath, "rb") as f:
+                        return f.read()
+        else:
+            raise FileNotFoundError
 
     def __init__(self, port):
         self.port = port
 
     def serve(self):
-        address = ('0.0.0.0', port)
+        address = ('127.0.0.1', port)
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -197,4 +226,3 @@ if __name__ == '__main__':
 
     server = HttpServer(port)
     server.serve()
-
