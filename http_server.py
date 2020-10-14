@@ -86,8 +86,7 @@ class HttpServer():
         """
 
         if path_.endswith('/'):
-            return b"text/plain"
-            # return b"text/html"
+            return b"text/html"
         else:
             return '{}'.format(mimetypes.guess_type(path_)[0]).encode("utf8") 
             
@@ -125,33 +124,17 @@ class HttpServer():
             # so this should raise a FileNotFoundError.
         """
 
-        # try:
-        #     if os.path.isdir("webroot/" + path_):
-        #         return ["{}".format(item).encode("utf8") for item in os.listdir("webroot/" + path_)]
-        #     if os.path.isfile("webroot/" + path_):
-        #         if path_.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif')):
-        #             Image.open("webroot/" + path_)
-        #         elif path_.lower().endswith(('.txt', '.py', '.html')):
-        #             with open("webroot/" + path_, "rb") as f:
-        #                 return f.read()           
-        # except FileNotFoundError:
-        #     raise FileNotFoundError(f"{path_} doesn't exist")
-
         filepath = "webroot/" + path_
         if os.path.exists(filepath): 
             if os.path.isdir(filepath):
-                # dirlst = ["{}\n".format(item) for item in os.listdir(filepath)]
-                # `<a href="/images/sample_1.png">arbitrary link text</a>`
-                dirlst = ["<a href={}>{}</a>\n".format(str(item), str(item)) for item in os.listdir(filepath)]
+                # This would turn the list of files in the directory clickable
+                dirlst = ["<a href={}>{}<br></a>\n".format(str(item), str(item)) for item in os.listdir(filepath)]
                 return "".join(dirlst).encode("utf8")
 
             if os.path.isfile(filepath):
-                if path_.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif')):
-                    with Image.open(filepath) as img:
-                        return img.show()
-                if path_.lower().endswith(('.txt', '.py', '.html')):
-                    with open(filepath, "rb") as f:
-                        return f.read()
+                # open method could evaluate all file type
+                with open(filepath, "rb") as f:
+                    return f.read()
         else:
             raise FileNotFoundError
 
@@ -159,7 +142,7 @@ class HttpServer():
         self.port = port
 
     def serve(self):
-        address = ('127.0.0.1', port)
+        address = ('127.0.0.1', self.port)
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
